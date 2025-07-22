@@ -1,0 +1,13 @@
+[project]
+name = "mcp-examples"
+version = "0.1.0"
+description = "mcp playground"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.10.6",
+    "markdownify>=1.1.0",
+    "protego>=0.5.0",
+    "pychalk>=2.0.1",
+    "readabilipy>=0.3.0",
+]
