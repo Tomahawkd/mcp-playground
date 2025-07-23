@@ -13,7 +13,7 @@ class CustomMCPClient:
     def __init__(self, server_url="http://127.0.0.1:8080/sse"):
         self.server_url = server_url
         self._sse_context = None
-        self._session = None
+        self._session: ClientSession = None
 
     async def __aenter__(self):
         # 创建 SSE 通道
@@ -36,12 +36,20 @@ class CustomMCPClient:
     async def list_tools(self):
         return await self._session.list_tools()
 
+    async def call_tool(self, args: Tuple[str, Dict[str, str]]):
+        return await self._session.call_tool(args[0], args[1])
+
     async def list_resources(self):
         return await self._session.list_resources()
 
-    async def call_tool(self, args):
-        args: Tuple[str, Dict[str, str]]
-        return await self._session.call_tool(args[0], args[1])
+    async def get_resource(self, url):
+        return await self._session.read_resource(url)
+
+    async def list_prompts(self):
+        return await self._session.list_prompts()
+
+    async def get_prompt(self, args: Tuple[str, Dict[str, str]]):
+        return await self._session.get_prompt(args[0], args[1])
 
 
 async def main():
@@ -56,6 +64,10 @@ async def main():
         print("\n📚 可用资源:")
         print(resources)
 
+        p = await client.list_prompts()
+        print("\n📚 可用Prompt:")
+        print(p)
+
         tools = {
             "fetch": fetch.send_request,
             "sequentialthinking": sequentialthinking.send_request,
@@ -69,6 +81,31 @@ async def main():
             print("\n🎯 工具返回:")
             for item in result.content:
                 print(" -", item.text)
+
+        res = [
+            "data://app-status"
+        ]
+
+        for r in res:
+            print(f"\n📡 获取资源: {r}")
+            result = await client.get_resource(r)
+
+            print("\n🎯 资源返回:")
+            for item in result.contents:
+                print(" -", item.text)
+
+        prompt = {
+            "analyze_data_request": {"data_uri": "123", "analysis_type": "type"}
+        }
+
+        for k,v in prompt.items():
+            print(f"\n📡 获取Prompt: {k}")
+            result = await client.get_prompt((k,v))
+
+            print("\n🎯 Prompt返回:")
+            for item in result.messages:
+                print(" -", item)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,6 +1,7 @@
 import asyncio
 
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field
 
 import fetch
 import filesystem
@@ -77,6 +78,27 @@ You should:
     mcp.add_tool(filesystem.stat_file,
                  name="filesystem",
                  description="Filesystem tool")
+
+    @mcp.resource(
+        uri="data://app-status",  # Explicit URI (required)
+        name="ApplicationStatus",  # Custom name
+        description="Provides the current status of the application.",  # Custom description
+        mime_type="application/json",  # Explicit MIME type
+    )
+    def get_application_status() -> dict:
+        """Internal function description (ignored if description is provided above)."""
+        return {"status": "ok", "uptime": 12345}
+
+    @mcp.prompt(
+        name="analyze_data_request",  # Custom prompt name
+        description="Creates a request to analyze data with specific parameters",  # Custom description
+    )
+    def data_analysis_prompt(
+            data_uri: str = Field(description="The URI of the resource containing the data."),
+            analysis_type: str = Field(default="summary", description="Type of analysis.")
+    ) -> str:
+        """This docstring is ignored when description is provided."""
+        return f"Please perform a '{analysis_type}' analysis on the data found at {data_uri}."
     await mcp.run_sse_async()
 
 
